@@ -3,8 +3,9 @@
 
 /* Max number of messages the receiver can receive at one time, this value 
  * is affected by can driver queue length
+ * Set to 6 as STM32F7 MCU has two receive FIFOs, each with three mailboxes.
  */
-#define ISO_TP_DEFAULT_BLOCK_SIZE   8
+#define ISO_TP_DEFAULT_BLOCK_SIZE   6
 
 /* The STmin parameter value specifies the minimum time gap allowed between 
  * the transmission of consecutive frame network protocol data units
