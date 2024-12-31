@@ -80,7 +80,7 @@ static int isotp_send_single_frame(const IsoTpLink* link, uint32_t id) {
     size = link->send_size + 1;
 #endif
 
-    ret = isotp_user_send_can(link->send_arbitration_id, message.as.data_array.ptr, size
+    ret = isotp_user_send_can(id, message.as.data_array.ptr, size
     #if defined (ISO_TP_USER_SEND_CAN_ARG)
     ,link->user_send_can_arg
     #endif

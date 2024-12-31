@@ -47,7 +47,7 @@ endif()
 # Include additional arg in isotp_user_send_can if required
 ###
 if (isotpc_ENABLE_CAN_SEND_ARG)
-    target_compile_options(isotp PRIVATE -DISO_TP_USER_SEND_CAN_ARG)
+    target_compile_options(isotp PUBLIC -DISO_TP_USER_SEND_CAN_ARG)
 endif()
 
 ###
