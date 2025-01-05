@@ -63,22 +63,22 @@ typedef struct IsoTpLink {
  * @brief Initialises the ISO-TP library.
  *
  * @param link The @code IsoTpLink @endcode instance used for transceiving data.
- * @param sendid The ID used to send data to other CAN nodes.
  * @param sendbuf A pointer to an area in memory which can be used as a buffer for data to be sent.
  * @param sendbufsize The size of the buffer area.
  * @param recvbuf A pointer to an area in memory which can be used as a buffer for data to be received.
  * @param recvbufsize The size of the buffer area.
  */
-void isotp_init_link(IsoTpLink *link, uint32_t sendid, 
-                     uint8_t *sendbuf, uint16_t sendbufsize,
-                     uint8_t *recvbuf, uint16_t recvbufsize);
+void isotp_init_link(IsoTpLink *link, uint16_t send_arbitration_id, uint16_t receive_arbitration_id);
+void isotp_config_sendbuf(IsoTpLink* link, uint8_t *sendbuf, uint16_t sendbufsize);
+void isotp_config_rcvbuf(IsoTpLink* link, uint8_t *recvbuf, uint16_t recvbufsize);
 
 /**
  * @brief Polling function; call this function periodically to handle timeouts, send consecutive frames, etc.
  *
  * @param link The @code IsoTpLink @endcode instance used.
+ *  - Return 1 if need to stop timer for isotp_poll, else 0
  */
-void isotp_poll(IsoTpLink *link);
+int isotp_poll(IsoTpLink *link);
 
 /**
  * @brief Handles incoming CAN messages.
@@ -87,8 +87,9 @@ void isotp_poll(IsoTpLink *link);
  * @param link The @code IsoTpLink @endcode instance used for transceiving data.
  * @param data The data received via CAN.
  * @param len The length of the data received.
+ *  - Return 1 if need to start timer for isotp_poll, else 0
  */
-void isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len);
+int isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len);
 
 /**
  * @brief Sends ISO-TP frames via CAN, using the ID set in the initialising function.
@@ -104,14 +105,9 @@ void isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len);
  *  - @code ISOTP_RET_OVERFLOW @endcode
  *  - @code ISOTP_RET_INPROGRESS @endcode
  *  - @code ISOTP_RET_OK @endcode
- *  - The return value of the user shim function isotp_user_send_can().
+ *  - Return 1 if need to start timer for isotp_poll, else 0
  */
 int isotp_send(IsoTpLink *link, const uint8_t payload[], uint16_t size);
-
-/**
- * @brief See @link isotp_send @endlink, with the exception that this function is used only for functional addressing.
- */
-int isotp_send_with_id(IsoTpLink *link, uint32_t id, const uint8_t payload[], uint16_t size);
 
 /**
  * @brief Receives and parses the received data and copies the parsed data in to the internal buffer.
