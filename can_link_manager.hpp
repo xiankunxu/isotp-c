@@ -5,7 +5,7 @@
 #include "isotp.h"
 
 template <typename... UInt8s>
-class CanIdManager {
+class CanLinkManager {
 private:
     static constexpr std::size_t N = sizeof...(UInt8s);
     /* bit 10: 1 for ISOTP CAN frame, 0 for non-ISOTP CAN frame;
@@ -20,7 +20,7 @@ private:
     std::array<IsoTpLink, N> isotpLinks_;
 
 public:
-    CanIdManager(uint8_t myCanAddr, UInt8s... peerCanAddrs): myCanAddr_(myCanAddr) {
+    CanLinkManager(uint8_t myCanAddr, UInt8s... peerCanAddrs): myCanAddr_(myCanAddr) {
         std::array<uint8_t, N> peerAddrs{peerCanAddrs...};
         for (std::size_t idx = 0; idx < N; ++idx) {
             isotp_init_link(&isotpLinks_[idx], MakeSendCanId(peerAddrs[idx]), MakeReceiveCanId(peerAddrs[idx]));
@@ -61,11 +61,11 @@ private:
 };
 
 /* Deduction guide (C++17+) so that we can write, e.g.:
- * CanIdManager canManagers(0x01, 0x10, 0x11);
+ * CanLinkManager canManagers(0x01, 0x10, 0x11);
  * The above defines my CAN addr as 0x01, it communicates
  * with two peer nodes that have CAN addrs 0x10 and 0x11
  */
 template <typename... UInt8s>
-CanIdManager(uint8_t, UInt8s...) -> CanIdManager<UInt8s...>;
+CanLinkManager(uint8_t, UInt8s...) -> CanLinkManager<UInt8s...>;
 
 #endif //CAN_ID_MANAGER_H
