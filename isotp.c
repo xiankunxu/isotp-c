@@ -306,10 +306,10 @@ int isotp_send(IsoTpLink *link, const uint8_t payload[], uint16_t size) {
 int isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len) {
     IsoTpCanMessage message;
     int ret;
-    int needStartTimer = 0;
+    int needStartPoll = 0;
     
     if (len < 2 || len > 8) {
-        return needStartTimer;
+        return 0;
     }
 
     memcpy(message.as.data_array.ptr, data, len);
@@ -379,7 +379,7 @@ int isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len) {
                 /* refresh timer cs */
                 link->receive_timer_cr = isotp_user_get_us() + ISO_TP_DEFAULT_RESPONSE_TIMEOUT_US;
 
-                needStartTimer = 1;
+                needStartPoll = 1;
             }
             
             break;
@@ -466,7 +466,7 @@ int isotp_on_can_message(IsoTpLink *link, const uint8_t *data, uint8_t len) {
             break;
     };
     
-    return needStartTimer;
+    return needStartPoll;
 }
 
 int isotp_receive(IsoTpLink *link, uint8_t *payload, const uint16_t payload_size, uint16_t *out_size) {
@@ -511,7 +511,7 @@ void isotp_config_rcvbuf(IsoTpLink* link, uint8_t *recvbuf, uint16_t recvbufsize
 
 int isotp_poll(IsoTpLink *link) {
     int ret;
-    int stopSendTimer = 0, stopReceiveTimer = 1; /* If need to stop the periodic polling timer */
+    int sendCompleted = 0, receiveCompleted = 1; /* If need to stop the periodic polling timer */
 
     /* only polling when operation in progress */
     if (ISOTP_SEND_STATUS_INPROGRESS == link->send_status) {
@@ -553,7 +553,7 @@ int isotp_poll(IsoTpLink *link) {
             /* Reset send status to IDLE so can do next send */
             link->send_status = ISOTP_SEND_STATUS_IDLE;
         }
-        stopSendTimer = 1;
+        sendCompleted = 1;
     }
 
     /* only polling when operation in progress */
@@ -564,9 +564,9 @@ int isotp_poll(IsoTpLink *link) {
             link->receive_protocol_result = ISOTP_PROTOCOL_RESULT_TIMEOUT_CR;
             link->receive_status = ISOTP_RECEIVE_STATUS_IDLE;
         } else {
-            stopReceiveTimer = 0;
+            receiveCompleted = 0;
         }
     }
 
-    return stopSendTimer & stopReceiveTimer;
+    return sendCompleted & receiveCompleted;
 }
