@@ -53,12 +53,19 @@ endif()
 ###
 # Check for debug builds
 ###
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(isotp PRIVATE -O0 -g) # don't optimise and add debugging symbols
-else()
-    target_compile_options(isotp PRIVATE -O2) # optimise code
-    target_link_libraries(isotp PRIVATE -s) # strip the library
-endif()
+
+# NOTE: Do NOT use target_compile_options to set optimization flags in the library
+#       Even though doing so will not change the optimization of other targets. But it
+#       will remove the debug information in the generated .map and .elf files if no -g
+#       is provided in this library (even  though -g is provided in other libraries)
+#       Actually, without target_compile_options, this library will use the C CXX flags
+#       set in other CMakeLists.txt (which we only set them in the main CMakeLists.txt)
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    target_compile_options(isotp PRIVATE -O0 -g) # don't optimise and add debugging symbols
+#else()
+#    target_compile_options(isotp PRIVATE -O2) # optimise code
+#    target_link_libraries(isotp PRIVATE -s) # strip the library
+#endif()
 
 if (isotpc_USE_INCLUDE_DIR)
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/isotp_c)
